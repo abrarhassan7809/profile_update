@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Expedients</title>
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            width: 150px;
+            margin-right: 10px;
+        }
+        .form-group input {
+            flex: 1;
+        }
+        .photo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .photo-container img {
+            width: 150px;
+            height: 170px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="mx-auto" style="padding-top: 20px; padding-bottom: 20px;">
+            <h1><a href="/user_form/"><img src="/static/assets/Logo.jpeg" alt="Logo" style="height: 50px; width: 50px; margin-right: 50px;"></a> Expedients</h1>
+        </div>
+        <form action="/user_form/" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label for="id" class="form-label">Id:</label>
+                        <input type="number" class="form-control" id="id" name="id" required>
+                        <label for="numero_tarjeta" class="form-label" style="padding-left: 20px;">Numero Tarjeta:</label>
+                        <input type="number" class="form-control" id="numero_tarjeta" name="numero_tarjeta" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nombre" class="form-label">Nombre:</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        <label for="apellidos" class="form-label" style="padding-left: 20px;">Apellidos:</label>
+                        <input type="text" class="form-control" id="apellidos" name="apellidos" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dni" class="form-label">DNI:</label>
+                        <input type="text" class="form-control" id="dni" name="dni" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="direccion" class="form-label">Direccion:</label>
+                        <input type="text" class="form-control" id="direccion" name="direccion" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha_expedicion" class="form-label">Fecha Expedició:</label>
+                        <input type="date" class="form-control" id="fecha_expedicion" name="fecha_expedicion" required>
+                        <label for="fecha_caducidad" class="form-label" style="padding-left: 20px;">Fecha Caducidad:</label>
+                        <input type="date" class="form-control" id="fecha_caducidad" name="fecha_caducidad">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="certificado_ingresos" class="form-label">Certificado de Ingresos:</label>
+                        <input type="text" class="form-control" id="certificado_ingresos" name="certificado_ingresos">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="certificado_jubilacion" class="form-label">Certificado de Jubilacion:</label>
+                        <input type="text" class="form-control" id="certificado_jubilacion" name="certificado_jubilacion">
+                    </div>
+                </div>
+
+                <div class="col-md-4 photo-container mx-auto my-auto">
+                    <img src="" alt="Foto" id="foto">
+                    <label for="foto_upload" class="btn btn-secondary btn-sm">Upload Foto</label>
+                    <input type="file" id="foto_upload" name="foto" style="display: none;">
+                </div>
+            </div>
+            <div style="padding-top: 20px;">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        document.getElementById('foto_upload').addEventListener('change', function(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('foto').src = e.target.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        });
+    </script>
+</body>
+</html>
