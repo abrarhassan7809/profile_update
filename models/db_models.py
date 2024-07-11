@@ -9,7 +9,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    is_active = Column(Boolean, default=True)
+    user_token = Column(String, unique=True, nullable=True)
+    is_active = Column(Boolean, default=False)
 
     profile = relationship("Profile", back_populates="user")
 

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Expedients</title>
     <style>
@@ -36,7 +40,26 @@
 <body>
     <div class="container">
         <div class="mx-auto" style="padding-top: 20px; padding-bottom: 20px;">
-            <h1><a href="/user_form/"><img src="/static/assets/Logo.jpeg" alt="Logo" style="height: 50px; width: 50px; margin-right: 50px;"></a> Expedients</h1>
+            <div class="">
+                <a href="/logout/" type="btn" style="float: right; background-color: #0056b3; color: white; padding: 8px; border-radius: 5px; text-decoration: none">Logout</a>
+            </div>
+            <div>
+                <h1><a href="/user_form/"><img src="/static/assets/Logo.jpeg" alt="Logo" style="height: 50px; width: 50px; margin-right: 50px;"></a> Expedients</h1>
+            </div>
+        </div>
+        <div class="">
+            {% if error %}
+                <div style="color: black;" class="alert alert-danger alert-dismissible mx-auto" role="alert">
+                    {{ error }}
+                    <span style="float: right; cursor: pointer; font-size: 20px;" aria-hidden="true" onclick="this.parentElement.style.display='none';">&times;</span>
+                </div>
+            {% endif %}
+            {% if message %}
+                <div style="color: black;" class="alert alert-success alert-dismissible mx-auto" role="alert">
+                    {{ message }}
+                    <span style="float: right; cursor: pointer; font-size: 20px;" aria-hidden="true" onclick="this.parentElement.style.display='none';">&times;</span>
+                </div>
+            {% endif %}
         </div>
         <form action="/user_form/" method="post" enctype="multipart/form-data">
             <div class="row">
@@ -69,24 +92,24 @@
                         <label for="fecha_expedicion" class="form-label">Fecha Expedició:</label>
                         <input type="date" class="form-control" id="fecha_expedicion" name="fecha_expedicion" required>
                         <label for="fecha_caducidad" class="form-label" style="padding-left: 20px;">Fecha Caducidad:</label>
-                        <input type="date" class="form-control" id="fecha_caducidad" name="fecha_caducidad">
+                        <input type="date" class="form-control" id="fecha_caducidad" name="fecha_caducidad" required>
                     </div>
 
                     <div class="form-group">
                         <label for="certificado_ingresos" class="form-label">Certificado de Ingresos:</label>
-                        <input type="text" class="form-control" id="certificado_ingresos" name="certificado_ingresos">
+                        <input type="text" class="form-control" id="certificado_ingresos" name="certificado_ingresos" required>
                     </div>
 
                     <div class="form-group">
                         <label for="certificado_jubilacion" class="form-label">Certificado de Jubilacion:</label>
-                        <input type="text" class="form-control" id="certificado_jubilacion" name="certificado_jubilacion">
+                        <input type="text" class="form-control" id="certificado_jubilacion" name="certificado_jubilacion" required>
                     </div>
                 </div>
 
                 <div class="col-md-4 photo-container mx-auto my-auto">
                     <img src="" alt="Foto" id="foto">
                     <label for="foto_upload" class="btn btn-secondary btn-sm">Upload Foto</label>
-                    <input type="file" id="foto_upload" name="foto" style="display: none;">
+                    <input type="file" id="foto_upload" name="foto" style="display: none;" required>
                 </div>
             </div>
             <div style="padding-top: 20px;">
@@ -103,5 +126,23 @@
             reader.readAsDataURL(event.target.files[0]);
         });
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var errorAlerts = document.querySelectorAll(".alert-danger");
+          var successAlerts = document.querySelectorAll(".alert-success");
+
+          errorAlerts.forEach(function (errorAlert) {
+              setTimeout(function () {
+                  errorAlert.style.display = "none";
+              }, 2000);
+          });
+
+          successAlerts.forEach(function (successAlert) {
+              setTimeout(function () {
+                  successAlert.style.display = "none";
+              }, 2000);
+          });
+        });
+  </script>
 </body>
 </html>
