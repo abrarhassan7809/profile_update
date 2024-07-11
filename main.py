@@ -28,7 +28,7 @@ async def logout(request: Request, db: Session = Depends(get_db)):
         is_user = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
         if is_user:
             is_user.user_token = None
-            is_user.user_status = False
+            is_user.is_active = False
             db.commit()
 
         response = RedirectResponse(url=app.url_path_for("get_login"))
