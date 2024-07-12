@@ -77,7 +77,7 @@ async def post_register(request: Request, email: str = Form(...), password: str 
         return templates.TemplateResponse("register.html", {"request": request, "error": error})
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/login/", response_class=HTMLResponse)
 async def get_login(request: Request):
     is_token = request.cookies.get('token')
     if is_token:
@@ -86,7 +86,7 @@ async def get_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@app.post("/")
+@app.post("/login/")
 async def post_login(request: Request, email: str = Form(...), password: str = Form(...),
                      db: Session = Depends(get_db)):
     is_token = request.cookies.get('token')
@@ -103,7 +103,7 @@ async def post_login(request: Request, email: str = Form(...), password: str = F
                 is_user.is_active = True
                 db.commit()
 
-                response = RedirectResponse(url="/user_form/", status_code=status.HTTP_303_SEE_OTHER)
+                response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
                 response.set_cookie(key="token", value=user_token)
 
                 return response
@@ -116,56 +116,56 @@ async def post_login(request: Request, email: str = Form(...), password: str = F
         return templates.TemplateResponse("login.html", {"request": request, "error": error})
 
 
-@app.get("/user_form/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    is_token = request.cookies.get('token')
-    print('get', is_token)
-    if is_token:
-        error = None
-        message = None
-        return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
+    # is_token = request.cookies.get('token')
+    # print('get', is_token)
+    # if is_token:
+    error = None
+    message = None
+    return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
 
-    return RedirectResponse(url=app.url_path_for("get_login"))
+    # return RedirectResponse(url=app.url_path_for("get_login"))
 
 
-@app.post("/user_form/")
+@app.post("/")
 async def submit_form(request: Request, id: int = Form(...), numero_tarjeta: int = Form(...), nombre: str = Form(...),
                       apellidos: str = Form(...), dni: str = Form(...), direccion: str = Form(...),
                       fecha_expedicion: str = Form(...), fecha_caducidad: str = Form(...),
                       certificado_ingresos: str = Form(), foto: UploadFile = File(None),
                       certificado_jubilacion: str = Form(...), db: Session = Depends(get_db)):
-    is_token = request.cookies.get('token')
-    if not is_token:
-        return RedirectResponse(url=app.url_path_for("get_login"))
+    # is_token = request.cookies.get('token')
+    # if not is_token:
+    #     return RedirectResponse(url=app.url_path_for("get_login"))
+    #
+    # is_user = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
 
-    is_user = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
+    # if is_user:
+    foto_path = None
+    if id or numero_tarjeta or nombre or apellidos or dni or direccion or fecha_expedicion or fecha_caducidad or certificado_ingresos or foto or certificado_jubilacion:
+        if foto:
+            foto_path = os.path.join(UPLOAD_DIRECTORY, foto.filename)
+            with open(foto_path, "wb") as buffer:
+                buffer.write(await foto.read())
 
-    if is_user:
-        foto_path = None
-        if id or numero_tarjeta or nombre or apellidos or dni or direccion or fecha_expedicion or fecha_caducidad or certificado_ingresos or foto or certificado_jubilacion:
-            if foto:
-                foto_path = os.path.join(UPLOAD_DIRECTORY, foto.filename)
-                with open(foto_path, "wb") as buffer:
-                    buffer.write(await foto.read())
+        new_record = db_models.Profile(profile_id=id, numero_tarjeta=numero_tarjeta, nombre=nombre, apellidos=apellidos,
+                                       dni=dni, direccion=direccion, fecha_expedicion=fecha_expedicion, foto=foto_path,
+                                       fecha_caducidad=fecha_caducidad, certificado_ingresos=certificado_ingresos,
+                                       user_id=1, certificado_jubilacion=certificado_jubilacion)
 
-            new_record = db_models.Profile(profile_id=id, numero_tarjeta=numero_tarjeta, nombre=nombre, apellidos=apellidos,
-                                           dni=dni, direccion=direccion, fecha_expedicion=fecha_expedicion, foto=foto_path,
-                                           fecha_caducidad=fecha_caducidad, certificado_ingresos=certificado_ingresos,
-                                           user_id=is_user.id, certificado_jubilacion=certificado_jubilacion)
+        db.add(new_record)
+        db.commit()
+        db.refresh(new_record)
 
-            db.add(new_record)
-            db.commit()
-            db.refresh(new_record)
-
-            error = None
-            message = "Profile added successfully!"
-            return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
-
-        error = "All fields are filled!"
-        message = None
+        error = None
+        message = "Profile added successfully!"
         return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
 
-    return RedirectResponse(url=app.url_path_for("get_login"))
+    error = "All fields are filled!"
+    message = None
+    return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
+
+    # return RedirectResponse(url=app.url_path_for("get_login"))
 
 
 if __name__ == "__main__":
