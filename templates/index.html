@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Expedients</title>
@@ -34,6 +34,16 @@
             height: 170px;
             border: 1px solid #ccc;
             margin-bottom: 10px;
+        }
+        .fa-file-pdf {
+            font-size: 30px;
+            margin-right: 20px;
+        }
+        .upload_file_field {
+            margin-right: 20px;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -104,6 +114,27 @@
                         <label for="certificado_jubilacion" class="form-label">Certificado de Jubilacion:</label>
                         <input type="text" class="form-control" id="certificado_jubilacion" name="certificado_jubilacion" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="cert_empadronamiento" class="form-label">Cert. Empadronamiento:</label>
+                        <span id="cert_empadronamiento_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
+                        <input type="file" class="form-control upload_file_field" id="cert_empadronamiento" name="cert_empadronamiento" accept="application/pdf" required>
+                        <button type="button" class="btn btn-secondary" onclick="openCamera('cert_empadronamiento')">Escanear</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cert_ingresos" class="form-label">Cert. Ingresos:</label>
+                        <span id="cert_ingresos_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
+                        <input type="file" class="form-control upload_file_field" id="cert_ingresos" name="cert_ingresos" accept="application/pdf" required>
+                        <button type="button" class="btn btn-secondary" onclick="openCamera('cert_ingresos')">Escanear</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="acreditacion" class="form-label">Acreditación:</label>
+                        <span id="acreditacion_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
+                        <input type="file" class="form-control upload_file_field" id="acreditacion" name="acreditacion" accept="application/pdf" required>
+                        <button type="button" class="btn btn-secondary" onclick="openCamera('acreditacion')">Escanear</button>
+                    </div>
                 </div>
 
                 <div class="col-md-4 photo-container mx-auto my-auto">
@@ -117,6 +148,25 @@
             </div>
         </form>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const errorAlerts = document.querySelectorAll(".alert-danger");
+            const successAlerts = document.querySelectorAll(".alert-success");
+
+            errorAlerts.forEach(function (errorAlert) {
+                setTimeout(function () {
+                  errorAlert.style.display = "none";
+                }, 2000);
+            });
+
+          successAlerts.forEach(function (successAlert) {
+              setTimeout(function () {
+                  successAlert.style.display = "none";
+              }, 2000);
+          });
+        });
+    </script>
     <script>
         document.getElementById('foto_upload').addEventListener('change', function(event) {
             const reader = new FileReader();
@@ -127,22 +177,82 @@
         });
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-          var errorAlerts = document.querySelectorAll(".alert-danger");
-          var successAlerts = document.querySelectorAll(".alert-success");
+        function openCamera(inputId) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Your browser does not support camera access.");
+                return;
+            }
 
-          errorAlerts.forEach(function (errorAlert) {
-              setTimeout(function () {
-                  errorAlert.style.display = "none";
-              }, 2000);
-          });
+            const video = document.createElement('video');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            let pdfDoc = null;
 
-          successAlerts.forEach(function (successAlert) {
-              setTimeout(function () {
-                  successAlert.style.display = "none";
-              }, 2000);
-          });
-        });
-  </script>
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                video.srcObject = stream;
+                video.play();
+                document.body.appendChild(video);
+
+                video.addEventListener('click', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    const imageDataURL = canvas.toDataURL('image/png'); // Convert to PNG format
+                    document.body.removeChild(video);
+                    stream.getTracks().forEach(track => track.stop());
+
+                    // Ensure pdf-lib is loaded
+                    if (typeof PDFLib !== 'undefined') {
+                        // Create PDFDocument
+                        PDFLib.PDFDocument.create().then(doc => {
+                            pdfDoc = doc;
+
+                            // Convert image data URL to Uint8Array
+                            const base64String = imageDataURL.split(',')[1];
+                            const bytes = window.atob(base64String);
+                            const arrayBuffer = new ArrayBuffer(bytes.length);
+                            const uint8Array = new Uint8Array(arrayBuffer);
+
+                            for (let i = 0; i < bytes.length; i++) {
+                                uint8Array[i] = bytes.charCodeAt(i);
+                            }
+
+                            // Add image to PDF
+                            doc.embedPng(uint8Array).then(imageRef => {
+                                const page = doc.addPage([canvas.width, canvas.height]);
+                                const { width, height } = imageRef.scale(0.5);
+                                page.drawImage(imageRef, {
+                                    x: 0,
+                                    y: 0,
+                                    width,
+                                    height,
+                                });
+
+                                // Save PDF
+                                doc.save().then(pdfBytes => {
+                                    const file = new File([pdfBytes], inputId + ".pdf", { type: "application/pdf" });
+                                    const dataTransfer = new DataTransfer();
+                                    dataTransfer.items.add(file);
+                                    const inputElement = document.getElementById(inputId);
+                                    inputElement.files = dataTransfer.files;
+                                    document.getElementById(inputId + '_icon').classList.remove('hidden');
+                                });
+                            }).catch(error => {
+                                console.error("Error embedding image into PDF: ", error);
+                            });
+                        }).catch(error => {
+                            console.error("Error creating PDF document: ", error);
+                        });
+                    } else {
+                        console.error("PDFLib is not defined or not loaded.");
+                    }
+                });
+            }).catch(error => {
+                console.error("Error accessing camera: ", error);
+            });
+        }
+    </script>
+
 </body>
 </html>

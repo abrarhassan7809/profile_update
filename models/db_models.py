@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date
 from sqlalchemy.orm import relationship
 from db_config.database_config import Base
 
@@ -30,6 +30,9 @@ class Profile(Base):
     certificado_ingresos = Column(String, nullable=False)
     certificado_jubilacion = Column(String, nullable=False)
     foto = Column(String, nullable=False)
+    cert_empadronamiento = Column(String, nullable=False)
+    cert_ingresos = Column(String, nullable=False)
+    acreditacion = Column(String, nullable=False)
 
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="profile")

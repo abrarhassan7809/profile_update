@@ -16,9 +16,13 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-UPLOAD_DIRECTORY = "uploads/"
+UPLOAD_DIRECTORY = "uploads/images/"
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
+
+UPLOAD_FILE_DIRECTORY = "uploads/pdf_files"
+if not os.path.exists(UPLOAD_FILE_DIRECTORY):
+    os.makedirs(UPLOAD_FILE_DIRECTORY)
 
 
 @app.get("/logout/")
@@ -133,7 +137,10 @@ async def submit_form(request: Request, id: int = Form(...), numero_tarjeta: int
                       apellidos: str = Form(...), dni: str = Form(...), direccion: str = Form(...),
                       fecha_expedicion: str = Form(...), fecha_caducidad: str = Form(...),
                       certificado_ingresos: str = Form(), foto: UploadFile = File(None),
-                      certificado_jubilacion: str = Form(...), db: Session = Depends(get_db)):
+                      certificado_jubilacion: str = Form(...), cert_empadronamiento: UploadFile = File(...),
+                      cert_ingresos: UploadFile = File(...), acreditacion: UploadFile = File(...),
+                      db: Session = Depends(get_db)):
+
     # is_token = request.cookies.get('token')
     # if not is_token:
     #     return RedirectResponse(url=app.url_path_for("get_login"))
@@ -148,10 +155,25 @@ async def submit_form(request: Request, id: int = Form(...), numero_tarjeta: int
             with open(foto_path, "wb") as buffer:
                 buffer.write(await foto.read())
 
+        cert_empadronamiento_path = os.path.join(UPLOAD_FILE_DIRECTORY, cert_empadronamiento.filename)
+        cert_ingresos_path = os.path.join(UPLOAD_FILE_DIRECTORY, cert_ingresos.filename)
+        acreditacion_path = os.path.join(UPLOAD_FILE_DIRECTORY, acreditacion.filename)
+
+        with open(cert_empadronamiento_path, "wb") as f:
+            f.write(cert_empadronamiento.file.read())
+
+        with open(cert_ingresos_path, "wb") as f:
+            f.write(cert_ingresos.file.read())
+
+        with open(acreditacion_path, "wb") as f:
+            f.write(acreditacion.file.read())
+
         new_record = db_models.Profile(profile_id=id, numero_tarjeta=numero_tarjeta, nombre=nombre, apellidos=apellidos,
                                        dni=dni, direccion=direccion, fecha_expedicion=fecha_expedicion, foto=foto_path,
                                        fecha_caducidad=fecha_caducidad, certificado_ingresos=certificado_ingresos,
-                                       user_id=1, certificado_jubilacion=certificado_jubilacion)
+                                       user_id=1, certificado_jubilacion=certificado_jubilacion,
+                                       cert_empadronamiento=cert_empadronamiento_path, cert_ingresos=cert_ingresos_path,
+                                       acreditacion=acreditacion_path)
 
         db.add(new_record)
         db.commit()
@@ -170,4 +192,4 @@ async def submit_form(request: Request, id: int = Form(...), numero_tarjeta: int
 
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
-    uvicorn.run("main:app", host='0.0.0.0', port=8000, workers=2, reload=True)
+    uvicorn.run("main:app", host='127.0.0.1', port=8000, workers=2, reload=True)
