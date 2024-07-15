@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import FastAPI, Form, File, UploadFile, Request, status, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -150,14 +152,15 @@ async def submit_form(request: Request, id: int = Form(...), numero_tarjeta: int
     # if is_user:
     foto_path = None
     if id or numero_tarjeta or nombre or apellidos or dni or direccion or fecha_expedicion or fecha_caducidad or certificado_ingresos or foto or certificado_jubilacion:
+        image_id = uuid.uuid4()
         if foto:
-            foto_path = os.path.join(UPLOAD_DIRECTORY, foto.filename)
+            foto_path = os.path.join(UPLOAD_DIRECTORY, f"{image_id}_{foto.filename}")
             with open(foto_path, "wb") as buffer:
                 buffer.write(await foto.read())
 
-        cert_empadronamiento_path = os.path.join(UPLOAD_FILE_DIRECTORY, cert_empadronamiento.filename)
-        cert_ingresos_path = os.path.join(UPLOAD_FILE_DIRECTORY, cert_ingresos.filename)
-        acreditacion_path = os.path.join(UPLOAD_FILE_DIRECTORY, acreditacion.filename)
+        cert_empadronamiento_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{cert_empadronamiento.filename}")
+        cert_ingresos_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{cert_ingresos.filename}")
+        acreditacion_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{acreditacion.filename}")
 
         with open(cert_empadronamiento_path, "wb") as f:
             f.write(cert_empadronamiento.file.read())
