@@ -68,10 +68,11 @@
     <div class="container">
         <div class="mx-auto" style="padding-top: 20px; padding-bottom: 20px;">
             <div class="">
-                <a href="/logout/" type="btn" style="float: right; background-color: #0056b3; color: white; padding: 8px; border-radius: 5px; text-decoration: none">Logout</a>
+                <a href="/logout/" class="btn btn-primary btn-sm" style="float: right; border-radius: 5px; text-decoration: none; margin-left: 10px;">Logout</a>
+                <a href="/show_database/" class="btn btn-secondary btn-sm" style="float: right; border-radius: 5px; text-decoration: none">Show Data</a>
             </div>
             <div>
-                <h1><a href="/"><img src="/static/assets/Logo.jpeg" alt="Logo" style="height: 50px; width: 50px; margin-right: 50px;"></a> Expedients</h1>
+                <h1><a href="/"><img src="/static/assets/Logo.jpeg" alt="Logo" style="height: 50px; width: 50px; margin-right: 50px;"></a>New Registration</h1>
             </div>
         </div>
         <div class="">
@@ -92,22 +93,29 @@
             <div class="row">
                 <div class="col-md-8">
                     <div class="form-group">
-                        <label for="id" class="form-label">Id:</label>
-                        <input type="number" class="form-control" id="id" name="id" required>
-                        <label for="numero_tarjeta" class="form-label" style="padding-left: 20px;">Numero Tarjeta:</label>
+                        <label for="numero_tarjeta" class="form-label">Numero Tarjeta:</label>
                         <input type="number" class="form-control" id="numero_tarjeta" name="numero_tarjeta" required>
+                        <label for="dni" class="form-label" style="padding-left: 20px;">DNI:</label>
+                        <input type="text" class="form-control" id="dni" name="dni" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="f_nacimiento" class="form-label">F. Nacimiento:</label>
+                        <input type="date" class="form-control" id="f_nacimiento" name="f_nacimiento" required>
+                        <label for="telefono" class="form-label" style="padding-left: 20px;">Telefono:</label>
+                        <input type="number" class="form-control" id="telefono" name="telefono" placeholder="+7910000000" required>
                     </div>
 
                     <div class="form-group">
                         <label for="nombre" class="form-label">Nombre:</label>
                         <input type="text" class="form-control" id="nombre" name="nombre" required>
-                        <label for="apellidos" class="form-label" style="padding-left: 20px;">Apellidos:</label>
-                        <input type="text" class="form-control" id="apellidos" name="apellidos" required>
+                        <label for="email" class="form-label" style="padding-left: 20px;">E-mail:</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="dni" class="form-label">DNI:</label>
-                        <input type="text" class="form-control" id="dni" name="dni" required>
+                        <label for="apellidos" class="form-label">Apellidos:</label>
+                        <input type="text" class="form-control" id="apellidos" name="apellidos" required>
                     </div>
 
                     <div class="form-group">
@@ -123,39 +131,33 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="certificado_ingresos" class="form-label">Certificado de Ingresos:</label>
-                        <input type="text" class="form-control" id="certificado_ingresos" name="certificado_ingresos" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="certificado_jubilacion" class="form-label">Certificado de Jubilacion:</label>
-                        <input type="text" class="form-control" id="certificado_jubilacion" name="certificado_jubilacion" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cert_empadronamiento" class="form-label">Cert. Empadronamiento:</label>
+                        <label class="form-label">Cert. Empadronamiento:</label>
                         <span id="cert_empadronamiento_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
-                        <input type="file" class="form-control upload_file_field" id="cert_empadronamiento" name="cert_empadronamiento" accept="application/pdf" required>
-                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('cert_empadronamiento')">Escanear</button>
+                        <button type="button" class="btn btn-secondary upload-file-button" onclick="document.getElementById('cert_empadronamiento_upload').click();">Adjuntar</button>
+                        <input type="file" class="form-control upload_file_field hidden" id="cert_empadronamiento_upload" name="cert_empadronamiento" accept="application/pdf" required>
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('cert_empadronamiento_upload')">Escanear</button>
                     </div>
 
                     <div class="form-group">
-                        <label for="cert_ingresos" class="form-label">Cert. Ingresos:</label>
+                        <label class="form-label">Cert. Ingresos:</label>
                         <span id="cert_ingresos_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
-                        <input type="file" class="form-control upload_file_field" id="cert_ingresos" name="cert_ingresos" accept="application/pdf" required>
-                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('cert_ingresos')">Escanear</button>
+                        <button type="button" class="btn btn-secondary upload-file-button" onclick="document.getElementById('cert_ingresos_upload').click();">Adjuntar</button>
+                        <input type="file" class="form-control upload_file_field hidden" id="cert_ingresos_upload" name="cert_ingresos" accept="application/pdf" required>
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('cert_ingresos_upload')">Escanear</button>
                     </div>
 
                     <div class="form-group">
-                        <label for="acreditacion" class="form-label">Acreditación:</label>
+                        <label class="form-label">Acreditación:</label>
                         <span id="acreditacion_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
-                        <input type="file" class="form-control upload_file_field" id="acreditacion" name="acreditacion" accept="application/pdf" required>
-                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('acreditacion')">Escanear</button>
+                        <button type="button" class="btn btn-secondary upload-file-button" onclick="document.getElementById('acreditacion_upload').click();">Adjuntar</button>
+                        <input type="file" class="form-control upload_file_field hidden" id="acreditacion_upload" name="acreditacion" accept="application/pdf" required>
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('acreditacion_upload')">Escanear</button>
                     </div>
                 </div>
 
                 <div class="col-md-4 photo-container mx-auto my-auto">
                     <img src="" alt="Foto" id="foto">
+                    <button type="button" class="btn btn-secondary btn-sm" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('profile_image')">Take Picture</button>
                     <label for="foto_upload" class="btn btn-secondary btn-sm">Upload Foto</label>
                     <input type="file" id="foto_upload" name="foto" style="display: none;" required>
                 </div>
@@ -238,7 +240,13 @@
             const imageDataURL = canvas.toDataURL('image/png');
 
             stopCamera();
-            createPDF(imageDataURL, window.currentInputId);
+
+            if (window.currentInputId === 'profile_image') {
+                document.getElementById('foto').src = imageDataURL;
+                document.getElementById('foto_upload').value = ''; // Clear the file input
+            } else {
+                createPDF(imageDataURL, window.currentInputId);
+            }
         }
 
         function stopCamera() {
@@ -293,6 +301,21 @@
                 console.error("PDFLib is not defined or not loaded.");
             }
         }
+
+        document.querySelectorAll('.upload_file_field').forEach(function(inputField) {
+            inputField.addEventListener('change', function(event) {
+                const fileName = event.target.files[0].name;
+                const inputId = event.target.id.replace('_upload', '');
+
+                const uploadButton = inputField.parentElement.querySelector('.upload-file-button');
+                uploadButton.textContent = fileName;
+
+                const pdfIcon = inputField.parentElement.querySelector('#' + inputId + '_icon');
+                if (pdfIcon) {
+                    pdfIcon.classList.remove('hidden');
+                }
+            })
+        })
 
         const cameraModal = document.getElementById('cameraModal');
         cameraModal.addEventListener('hidden.bs.modal', stopCamera);

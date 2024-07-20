@@ -1,14 +1,12 @@
 import uuid
-
 from fastapi import FastAPI, Form, File, UploadFile, Request, status, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 from db_config.database_config import get_db, Base, engine
 from email_validator import validate_email, EmailNotValidError
-
 from db_config.db_functions import create_token
 from models import db_models
 import uvicorn
@@ -18,13 +16,8 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-UPLOAD_DIRECTORY = "uploads/images/"
-if not os.path.exists(UPLOAD_DIRECTORY):
-    os.makedirs(UPLOAD_DIRECTORY)
-
-UPLOAD_FILE_DIRECTORY = "uploads/pdf_files"
-if not os.path.exists(UPLOAD_FILE_DIRECTORY):
-    os.makedirs(UPLOAD_FILE_DIRECTORY)
+UPLOAD_DIRECTORY = "static/uploads/images/"
+UPLOAD_FILE_DIRECTORY = "static/uploads/pdf_files"
 
 
 @app.get("/logout/")
@@ -124,73 +117,102 @@ async def post_login(request: Request, email: str = Form(...), password: str = F
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    # is_token = request.cookies.get('token')
-    # print('get', is_token)
-    # if is_token:
-    error = None
-    message = None
-    return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
+    is_token = request.cookies.get('token')
+    if is_token:
+        error = None
+        message = None
+        return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
 
-    # return RedirectResponse(url=app.url_path_for("get_login"))
+    return RedirectResponse(url=app.url_path_for("get_login"))
 
 
 @app.post("/")
-async def submit_form(request: Request, id: int = Form(...), numero_tarjeta: int = Form(...), nombre: str = Form(...),
-                      apellidos: str = Form(...), dni: str = Form(...), direccion: str = Form(...),
-                      fecha_expedicion: str = Form(...), fecha_caducidad: str = Form(...),
-                      certificado_ingresos: str = Form(), foto: UploadFile = File(None),
-                      certificado_jubilacion: str = Form(...), cert_empadronamiento: UploadFile = File(...),
-                      cert_ingresos: UploadFile = File(...), acreditacion: UploadFile = File(...),
+async def submit_form(request: Request, numero_tarjeta: int = Form(...), dni: str = Form(...), nombre: str = Form(...),
+                      apellidos: str = Form(...), direccion: str = Form(...), fecha_expedicion: str = Form(...),
+                      f_nacimiento: str = Form(...), email: str = Form(None), telefono: str = Form(),
+                      foto: UploadFile = File(...), fecha_caducidad: str = Form(...),
+                      cert_empadronamiento: UploadFile = File(...), cert_ingresos: UploadFile = File(...),
+                      acreditacion: UploadFile = File(...),
                       db: Session = Depends(get_db)):
 
-    # is_token = request.cookies.get('token')
-    # if not is_token:
-    #     return RedirectResponse(url=app.url_path_for("get_login"))
-    #
-    # is_user = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
+    is_token = request.cookies.get('token')
+    if not is_token:
+        return RedirectResponse(url=app.url_path_for("get_login"))
 
-    # if is_user:
-    foto_path = None
-    if id or numero_tarjeta or nombre or apellidos or dni or direccion or fecha_expedicion or fecha_caducidad or certificado_ingresos or foto or certificado_jubilacion:
-        image_id = uuid.uuid4()
-        if foto:
-            foto_path = os.path.join(UPLOAD_DIRECTORY, f"{image_id}_{foto.filename}")
-            with open(foto_path, "wb") as buffer:
-                buffer.write(await foto.read())
+    is_user = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
 
-        cert_empadronamiento_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{cert_empadronamiento.filename}")
-        cert_ingresos_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{cert_ingresos.filename}")
-        acreditacion_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{acreditacion.filename}")
+    if is_user:
+        profile_image_path = None
+        if numero_tarjeta or nombre or apellidos or dni or direccion or fecha_expedicion or f_nacimiento or telefono or foto:
+            image_id = uuid.uuid4()
+            if not os.path.exists(UPLOAD_DIRECTORY):
+                os.makedirs(UPLOAD_DIRECTORY)
 
-        with open(cert_empadronamiento_path, "wb") as f:
-            f.write(cert_empadronamiento.file.read())
+            if foto:
+                profile_image_path = os.path.join(UPLOAD_DIRECTORY, f"{image_id}_{foto.filename}")
+                with open(profile_image_path, "wb") as buffer:
+                    buffer.write(await foto.read())
 
-        with open(cert_ingresos_path, "wb") as f:
-            f.write(cert_ingresos.file.read())
+            if not os.path.exists(UPLOAD_FILE_DIRECTORY):
+                os.makedirs(UPLOAD_FILE_DIRECTORY)
 
-        with open(acreditacion_path, "wb") as f:
-            f.write(acreditacion.file.read())
+            cert_empadronamiento_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{cert_empadronamiento.filename}")
+            cert_ingresos_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{cert_ingresos.filename}")
+            acreditacion_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{acreditacion.filename}")
 
-        new_record = db_models.Profile(profile_id=id, numero_tarjeta=numero_tarjeta, nombre=nombre, apellidos=apellidos,
-                                       dni=dni, direccion=direccion, fecha_expedicion=fecha_expedicion, foto=foto_path,
-                                       fecha_caducidad=fecha_caducidad, certificado_ingresos=certificado_ingresos,
-                                       user_id=1, certificado_jubilacion=certificado_jubilacion,
-                                       cert_empadronamiento=cert_empadronamiento_path, cert_ingresos=cert_ingresos_path,
-                                       acreditacion=acreditacion_path)
+            with open(cert_empadronamiento_path, "wb") as f:
+                f.write(cert_empadronamiento.file.read())
 
-        db.add(new_record)
-        db.commit()
-        db.refresh(new_record)
+            with open(cert_ingresos_path, "wb") as f:
+                f.write(cert_ingresos.file.read())
 
-        error = None
-        message = "Profile added successfully!"
+            with open(acreditacion_path, "wb") as f:
+                f.write(acreditacion.file.read())
+
+            new_record = db_models.Profile(numero_tarjeta=numero_tarjeta, nombre=nombre, apellidos=apellidos,
+                                           dni=dni, direccion=direccion, fecha_expedicion=fecha_expedicion,
+                                           foto=profile_image_path, f_nacimiento=f_nacimiento, telefono=telefono,
+                                           user_id=1, fecha_caducidad=fecha_caducidad, email=email,
+                                           cert_empadronamiento=cert_empadronamiento_path,
+                                           cert_ingresos=cert_ingresos_path, acreditacion=acreditacion_path)
+
+            db.add(new_record)
+            db.commit()
+            db.refresh(new_record)
+
+            error = None
+            message = "Profile added successfully!"
+            return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
+
+        error = "All fields are filled!"
+        message = None
         return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
 
-    error = "All fields are filled!"
-    message = None
-    return templates.TemplateResponse("index.html", {"request": request, "error": error, "message": message})
+    return RedirectResponse(url=app.url_path_for("get_login"))
 
-    # return RedirectResponse(url=app.url_path_for("get_login"))
+
+@app.get("/show_database/")
+def get_database(request: Request, db: Session = Depends(get_db)):
+    from_data = db.query(db_models.Profile).all()
+    return templates.TemplateResponse("database.html", {"request": request, "from_data": from_data})
+
+
+@app.get("/search_user_from/")
+def get_user_from(request: Request, search: str = '', db: Session = Depends(get_db)):
+    from_data = db.query(db_models.Profile).filter(or_(db_models.Profile.numero_tarjeta.like(f"%{search}%"),
+                                                       db_models.Profile.dni.like(f"%{search}%"),
+                                                       db_models.Profile.nombre.like(f"%{search}%"),
+                                                       db_models.Profile.apellidos.like(f"%{search}%"),
+                                                       db_models.Profile.direccion.like(f"%{search}%"),
+                                                       db_models.Profile.email.like(f"%{search}%"),
+                                                       db_models.Profile.telefono.like(f"%{search}%"))).all()
+    return templates.TemplateResponse("database.html", {"request": request, "from_data": from_data})
+
+
+@app.get("/edit_form/{from_id}/")
+def edit_form(request: Request, from_id: int, db: Session = Depends(get_db)):
+    from_data = db.query(db_models.Profile).filter(db_models.Profile.id == from_id).first()
+    return templates.TemplateResponse("edit_from.html", {"request": request, "from_data": from_data})
 
 
 if __name__ == "__main__":

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Expedients</title>
+
+    <style>
+        body {
+            background-color: whitesmoke;
+            padding-top: 30px;
+            padding-bottom: 50px;
+        }
+        .header {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .search-container {
+            margin-right: 20px;
+            float: right;
+        }
+        .search-container input[type=text] {
+            padding: 4px;
+            font-size: 16px;
+            border: none;
+        }
+        .search-container button {
+            float: right;
+            padding: 4px 10px;
+            background: #ddd;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+        .search-container button:hover {
+            background: #ccc;
+        }
+        .go_back {
+            float: right;
+        }
+        .data-table-container {
+            margin-top: 20px;
+            white-space: nowrap;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .data-table {
+            width: 100%;
+            background-color: white;
+            border-collapse: collapse;
+            text-align: left;
+            border-spacing: 0;
+        }
+        .data-table th {
+            padding: 0.6rem;
+            font-size: 15px;
+            background-color: #000000;
+            color: white;
+        }
+        .data-table tbody tr td {
+            padding: 10px 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .data-table tbody tr td img {
+            height: 40px;
+            width: 30px;
+        }
+        .data-table tbody tr:hover {
+            background-color: #cccccc;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="header">
+            <a href="/" class="btn btn-primary btn-sm go_back">Go Back</a>
+            <div class="search-container">
+                <form action="/search_user_from/" method="get">
+                    <input type="text" placeholder="Search.." name="search">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+            </div>
+            <h2 class="">Users Database</h2>
+        </div>
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Profile</th>
+                        <th>Numero Tarjeta</th>
+                        <th>DNI</th>
+                        <th>F. Nacimiento</th>
+                        <th>Telefono</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Apellidos</th>
+                        <th>Direccion</th>
+                        <th>Fecha Expedició</th>
+                        <th>Fecha Caducidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for data in from_data %}
+                    <tr data-href="/edit_form/{{ data.id }}/">
+                        <td><img src="/{{ data.foto }}" alt="profile image"></td>
+                        <td>{{ data.numero_tarjeta }}</td>
+                        <td>{{ data.dni }}</td>
+                        <td>{{ data.f_nacimiento }}</td>
+                        <td>{{ data.telefono }}</td>
+                        <td>{{ data.nombre }}</td>
+                        <td>{{ data.email }}</td>
+                        <td>{{ data.apellidos }}</td>
+                        <td>{{ data.direccion }}</td>
+                        <td>{{ data.fecha_expedicion }}</td>
+                        <td>{{ data.fecha_caducidad }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('.data-table tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('click', function() {
+                    const href = this.getAttribute('data-href');
+                    if (href) {
+                        window.location.href = href;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

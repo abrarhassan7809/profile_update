@@ -1,3 +1,4 @@
 .venv
 profile_database.db
-uploads
+static/uploads
+templates/index2.html
