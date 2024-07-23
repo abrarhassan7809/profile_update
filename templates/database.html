@@ -23,7 +23,7 @@
             padding-right: 20px;
         }
         .search-container {
-            margin-right: 20px;
+            margin-right: 10px;
             float: right;
         }
         .search-container input[type=text] {
@@ -44,6 +44,7 @@
         }
         .go_back {
             float: right;
+            margin-right: 10px;
         }
         .data-table-container {
             margin-top: 20px;
@@ -82,27 +83,31 @@
 <body>
     <div class="container-fluid">
         <div class="header">
-            <a href="/" class="btn btn-primary btn-sm go_back">Go Back</a>
+            <a href="/logout/" class="btn btn-secondary btn-sm go_back">Logout</a>
             <div class="search-container">
                 <form action="/search_user_from/" method="get">
-                    <input type="text" placeholder="Search.." name="search">
+                    <input type="text" placeholder="Buscar..." name="search">
                     <button type="submit"><i class="fa fa-search"></i></button>
                 </form>
             </div>
+            <a href="/search_user_from/" class="btn btn-secondary btn-sm go_back">Clear</a>
+            {% if user_data.user_role == 'Admin' %}
+                <a href="/admin_register/" class="btn btn-primary btn-sm go_back">Add User</a>
+            {% endif %}
+            <a href="/" class="btn btn-success btn-sm go_back">+Register</a>
             <h2 class="">Users Database</h2>
         </div>
         <div class="data-table-container">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Profile</th>
                         <th>Numero Tarjeta</th>
                         <th>DNI</th>
                         <th>F. Nacimiento</th>
-                        <th>Telefono</th>
                         <th>Nombre</th>
-                        <th>Email</th>
                         <th>Apellidos</th>
+                        <th>Telefono</th>
+                        <th>Email</th>
                         <th>Direccion</th>
                         <th>Fecha Expedició</th>
                         <th>Fecha Caducidad</th>
@@ -111,14 +116,13 @@
                 <tbody>
                 {% for data in from_data %}
                     <tr data-href="/edit_form/{{ data.id }}/">
-                        <td><img src="/{{ data.foto }}" alt="profile image"></td>
                         <td>{{ data.numero_tarjeta }}</td>
                         <td>{{ data.dni }}</td>
                         <td>{{ data.f_nacimiento }}</td>
-                        <td>{{ data.telefono }}</td>
                         <td>{{ data.nombre }}</td>
-                        <td>{{ data.email }}</td>
                         <td>{{ data.apellidos }}</td>
+                        <td>{{ data.telefono }}</td>
+                        <td>{{ data.email }}</td>
                         <td>{{ data.direccion }}</td>
                         <td>{{ data.fecha_expedicion }}</td>
                         <td>{{ data.fecha_caducidad }}</td>

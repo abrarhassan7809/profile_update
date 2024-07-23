@@ -24,7 +24,7 @@
         }
         .go_back {
             float: right;
-            margin-top: 10px;
+            margin-left: 10px;
         }
         .card {
             margin-top: 30px;
@@ -35,6 +35,7 @@
             height: 400px;
             width: 350px;
             opacity: 0.8;
+            padding: 50px;
         }
         .card-body {
             padding: 40px 20px 40px 40px;
@@ -51,61 +52,93 @@
         .form-group input {
             flex: 1;
         }
+        .fa-file-pdf {
+            font-size: 30px;
+            margin-right: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <a href="/show_database/" class="btn btn-primary btn-sm go_back">Go Back</a>
-            <h2 class="">Users From</h2>
-        </div>
+        {% if from_data %}
+            <form class="" method="post" enctype="multipart/form-data" action="/update_form/{{from_data.id}}/">
+                <div class="header">
+                    <a href="/logout/" class="btn btn-secondary btn-sm go_back">Logout</a>
+                    <a href="/show_database/" class="btn btn-primary btn-sm go_back">Go Back</a>
+                    {% if user_data.user_role == 'Admin' %}
+                        <button type="submit" class="btn btn-success btn-sm go_back">Modificar</button>
+                        <a href="/delete_form/{{from_data.id}}/" class="btn btn-danger btn-sm go_back">Eliminar</a>
+                    {% endif %}
+                    <h2 class="">Users From</h2>
+                </div>
 
-        <div class="card flex-row">
-            <img src="/{{from_data.foto}}" alt="profile image" class="card-img-sm-left">
-            <div class="card-body my-auto">
-                {% if from_data %}
-                    <form class="" enctype="multipart/form-data">
+                <div class="card flex-row">
+                    <img src="/{{from_data.foto}}" alt="profile image" class="card-img-sm-left">
+                    <div class="card-body my-auto">
                         <div class="form-group">
                             <label for="numero_tarjeta" class="form-label">Numero Tarjeta:</label>
-                            <input type="number" value="{{from_data.numero_tarjeta}}" class="form-control" id="numero_tarjeta" name="numero_tarjeta" readonly>
+                            <input type="number" value="{{from_data.numero_tarjeta}}" class="form-control" id="numero_tarjeta" name="numero_tarjeta" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                             <label for="dni" class="form-label" style="padding-left: 20px;">DNI:</label>
-                            <input type="text" value="{{from_data.dni}}" class="form-control" id="dni" name="dni" readonly>
+                            <input type="text" value="{{from_data.dni}}" class="form-control" id="dni" name="dni" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                         </div>
 
                         <div class="form-group">
                             <label for="f_nacimiento" class="form-label">F. Nacimiento:</label>
-                            <input type="date" value="{{from_data.f_nacimiento}}" class="form-control" id="f_nacimiento" name="f_nacimiento" readonly>
+                            <input type="date" value="{{from_data.f_nacimiento}}" class="form-control" id="f_nacimiento" name="f_nacimiento" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                             <label for="telefono" class="form-label" style="padding-left: 20px;">Telefono:</label>
-                            <input type="number" value="{{from_data.telefono}}" class="form-control" id="telefono" name="telefono" placeholder="+7910000000" readonly>
+                            <input type="number" value="{{from_data.telefono}}" class="form-control" id="telefono" name="telefono" placeholder="+7910000000" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                         </div>
 
                         <div class="form-group">
                             <label for="nombre" class="form-label">Nombre:</label>
-                            <input type="text" value="{{from_data.nombre}}" class="form-control" id="nombre" name="nombre" readonly>
+                            <input type="text" value="{{from_data.nombre}}" class="form-control" id="nombre" name="nombre" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                             <label for="email" class="form-label" style="padding-left: 20px;">E-mail:</label>
-                            <input type="email" value="{{from_data.email}}" class="form-control" id="email" name="email" readonly>
+                            <input type="email" value="{{from_data.email}}" class="form-control" id="email" name="email" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                         </div>
 
                         <div class="form-group">
                             <label for="apellidos" class="form-label">Apellidos:</label>
-                            <input type="text" value="{{from_data.apellidos}}" class="form-control" id="apellidos" name="apellidos" readonly>
+                            <input type="text" value="{{from_data.apellidos}}" class="form-control" id="apellidos" name="apellidos" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                         </div>
 
                         <div class="form-group">
                             <label for="direccion" class="form-label">Direccion:</label>
-                            <input type="text" value="{{from_data.direccion}}" class="form-control" id="direccion" name="direccion" readonly>
+                            <input type="text" value="{{from_data.direccion}}" class="form-control" id="direccion" name="direccion" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                         </div>
 
                         <div class="form-group">
                             <label for="fecha_expedicion" class="form-label">Fecha Expedició:</label>
-                            <input type="date" value="{{from_data.fecha_expedicion}}" class="form-control" id="fecha_expedicion" name="fecha_expedicion" readonly>
+                            <input type="date" value="{{from_data.fecha_expedicion}}" class="form-control" id="fecha_expedicion" name="fecha_expedicion" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                             <label for="fecha_caducidad" class="form-label" style="padding-left: 20px;">Fecha Caducidad:</label>
-                            <input type="date" value="{{from_data.fecha_caducidad}}" class="form-control" id="fecha_caducidad" name="fecha_caducidad" readonly>
+                            <input type="date" value="{{from_data.fecha_caducidad}}" class="form-control" id="fecha_caducidad" name="fecha_caducidad" {% if user_data.user_role == 'User' %}readonly{% endif %}>
                         </div>
-                    </form>
-                {% endif %}
-            </div>
-        </div>
+
+                        <div class="form-group">
+                            <label for="cert_empadronamiento" class="form-label">Cert. Empadronamiento:</label>
+                            <a href="/{{from_data.cert_empadronamiento}}" target="_blank">
+                                <span id="cert_empadronamiento_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
+                            </a>
+                            <input type="file" class="form-control" id="cert_empadronamiento" name="cert_empadronamiento" {% if user_data.user_role == 'User' %}disabled{% endif %}>
+                        </div>
+                        <div class="form-group">
+                            <label for="cert_ingresos" class="form-label">Cert. Ingresos:</label>
+                            <a href="/{{from_data.cert_ingresos}}" target="_blank">
+                                <span id="cert_ingresos_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
+                            </a>
+                            <input type="file" class="form-control" id="cert_ingresos" name="cert_ingresos" {% if user_data.user_role == 'User' %}disabled{% endif %}>
+                        </div>
+                        <div class="form-group">
+                            <label for="acreditacion" class="form-label">Acreditación:</label>
+                            <a href="/{{from_data.acreditacion}}" target="_blank">
+                                <span id="acreditacion_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
+                            </a>
+                            <input type="file" class="form-control" id="acreditacion" name="acreditacion" {% if user_data.user_role == 'User' %}disabled{% endif %}>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        {% endif %}
     </div>
 </body>
 </html>

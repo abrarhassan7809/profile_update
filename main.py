@@ -1,3 +1,4 @@
+import shutil
 import uuid
 from fastapi import FastAPI, Form, File, UploadFile, Request, status, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -76,6 +77,55 @@ async def post_register(request: Request, email: str = Form(...), password: str 
         return templates.TemplateResponse("register.html", {"request": request, "error": error})
 
 
+@app.get("/admin_register/", response_class=HTMLResponse)
+async def get_admin_register(request: Request, db: Session = Depends(get_db)):
+    is_token = request.cookies.get('token')
+    if not is_token:
+        return RedirectResponse(url=app.url_path_for("get_login"))
+
+    is_admin = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
+    if is_admin.user_role == "User":
+        return RedirectResponse(url=app.url_path_for("read_root"))
+
+    return templates.TemplateResponse("admin_register.html", {"request": request})
+
+
+@app.post("/admin_register/")
+async def post_admin_register(request: Request, email: str = Form(...), password: str = Form(...),
+                              confirm_password: str = Form(...), user_role: str = Form(...),
+                              db: Session = Depends(get_db)):
+    is_token = request.cookies.get('token')
+    if not is_token:
+        return RedirectResponse(url=app.url_path_for("get_login"))
+
+    is_admin = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
+    if is_admin.user_role == "User":
+        return RedirectResponse(url=app.url_path_for("read_root"))
+
+    try:
+        if validate_email(email):
+            is_user = db.query(db_models.User).filter(db_models.User.email == email).first()
+            if not is_user:
+                if password == confirm_password:
+                    user_data = db_models.User(email=email, password=password, user_role=user_role, user_token=None)
+                    db.add(user_data)
+                    db.commit()
+                    db.refresh(user_data)
+                    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
+                else:
+                    error = "Password not match!"
+                    return templates.TemplateResponse("register.html", {"request": request, "error": error})
+
+            else:
+                error = "User Already Exists!"
+                return templates.TemplateResponse("register.html", {"request": request, "error": error})
+
+    except EmailNotValidError as e:
+        error = "Email not valid!"
+        return templates.TemplateResponse("register.html", {"request": request, "error": error})
+
+
 @app.get("/login/", response_class=HTMLResponse)
 async def get_login(request: Request):
     is_token = request.cookies.get('token')
@@ -134,7 +184,6 @@ async def submit_form(request: Request, numero_tarjeta: int = Form(...), dni: st
                       cert_empadronamiento: UploadFile = File(...), cert_ingresos: UploadFile = File(...),
                       acreditacion: UploadFile = File(...),
                       db: Session = Depends(get_db)):
-
     is_token = request.cookies.get('token')
     if not is_token:
         return RedirectResponse(url=app.url_path_for("get_login"))
@@ -156,7 +205,8 @@ async def submit_form(request: Request, numero_tarjeta: int = Form(...), dni: st
             if not os.path.exists(UPLOAD_FILE_DIRECTORY):
                 os.makedirs(UPLOAD_FILE_DIRECTORY)
 
-            cert_empadronamiento_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{cert_empadronamiento.filename}")
+            cert_empadronamiento_path = os.path.join(UPLOAD_FILE_DIRECTORY,
+                                                     f"{image_id}_{cert_empadronamiento.filename}")
             cert_ingresos_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{cert_ingresos.filename}")
             acreditacion_path = os.path.join(UPLOAD_FILE_DIRECTORY, f"{image_id}_{acreditacion.filename}")
 
@@ -192,27 +242,123 @@ async def submit_form(request: Request, numero_tarjeta: int = Form(...), dni: st
 
 
 @app.get("/show_database/")
-def get_database(request: Request, db: Session = Depends(get_db)):
+async def get_database(request: Request, db: Session = Depends(get_db)):
+    is_token = request.cookies.get('token')
+    if not is_token:
+        return RedirectResponse(url=app.url_path_for("get_login"))
+
+    user_data = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
+    print(user_data.user_role)
     from_data = db.query(db_models.Profile).all()
-    return templates.TemplateResponse("database.html", {"request": request, "from_data": from_data})
+    return templates.TemplateResponse("database.html", {"request": request, "from_data": from_data,
+                                                        "user_data": user_data})
 
 
 @app.get("/search_user_from/")
-def get_user_from(request: Request, search: str = '', db: Session = Depends(get_db)):
+async def get_user_from(request: Request, search: str = '', db: Session = Depends(get_db)):
+    is_token = request.cookies.get('token')
+    if not is_token:
+        return RedirectResponse(url=app.url_path_for("get_login"))
+
+    user_data = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
     from_data = db.query(db_models.Profile).filter(or_(db_models.Profile.numero_tarjeta.like(f"%{search}%"),
                                                        db_models.Profile.dni.like(f"%{search}%"),
                                                        db_models.Profile.nombre.like(f"%{search}%"),
-                                                       db_models.Profile.apellidos.like(f"%{search}%"),
-                                                       db_models.Profile.direccion.like(f"%{search}%"),
-                                                       db_models.Profile.email.like(f"%{search}%"),
-                                                       db_models.Profile.telefono.like(f"%{search}%"))).all()
-    return templates.TemplateResponse("database.html", {"request": request, "from_data": from_data})
+                                                       db_models.Profile.apellidos.like(f"%{search}%")))
+    return templates.TemplateResponse("database.html", {"request": request, "from_data": from_data,
+                                                        "user_data": user_data})
 
 
 @app.get("/edit_form/{from_id}/")
-def edit_form(request: Request, from_id: int, db: Session = Depends(get_db)):
+async def edit_form(request: Request, from_id: int, db: Session = Depends(get_db)):
+    is_token = request.cookies.get('token')
+    if not is_token:
+        return RedirectResponse(url=app.url_path_for("get_login"))
+
+    user_data = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
     from_data = db.query(db_models.Profile).filter(db_models.Profile.id == from_id).first()
-    return templates.TemplateResponse("edit_from.html", {"request": request, "from_data": from_data})
+    return templates.TemplateResponse("edit_from.html", {"request": request, "from_data": from_data,
+                                                         "user_data": user_data})
+
+
+@app.post("/update_form/{from_id}/")
+async def update_form(request: Request, from_id: int, numero_tarjeta: int = Form(...), dni: str = Form(...), nombre: str = Form(...),
+                      apellidos: str = Form(...), direccion: str = Form(...), fecha_expedicion: str = Form(...),
+                      f_nacimiento: str = Form(...), email: str = Form(...), telefono: str = Form(),
+                      fecha_caducidad: str = Form(...), cert_empadronamiento: UploadFile = File(None),
+                      cert_ingresos: UploadFile = File(None), acreditacion: UploadFile = File(None),
+                      db: Session = Depends(get_db)):
+    is_token = request.cookies.get('token')
+    if not is_token:
+        return RedirectResponse(url=app.url_path_for("get_login"))
+
+    is_admin = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
+    if is_admin and is_admin.user_role == "Admin":
+        from_data = db.query(db_models.Profile).filter(db_models.Profile.id == from_id).first()
+        if from_data:
+            from_data.numero_tarjeta = numero_tarjeta
+            from_data.dni = dni
+            from_data.nombre = nombre
+            from_data.apellidos = apellidos
+            from_data.direccion = direccion
+            from_data.fecha_expedicion = fecha_expedicion
+            from_data.f_nacimiento = f_nacimiento
+            from_data.email = email
+            from_data.telefono = telefono
+            from_data.fecha_caducidad = fecha_caducidad
+
+            upload_directory = UPLOAD_FILE_DIRECTORY
+
+            if cert_empadronamiento and cert_empadronamiento.filename:
+                cert_empadronamiento_path = os.path.join(upload_directory, f"{from_id}_{cert_empadronamiento.filename}")
+                with open(cert_empadronamiento_path, "wb") as buffer:
+                    shutil.copyfileobj(cert_empadronamiento.file, buffer)
+                from_data.cert_empadronamiento = cert_empadronamiento_path
+
+            if cert_ingresos and cert_ingresos.filename:
+                cert_ingresos_path = os.path.join(upload_directory, f"{from_id}_{cert_ingresos.filename}")
+                with open(cert_ingresos_path, "wb") as buffer:
+                    shutil.copyfileobj(cert_ingresos.file, buffer)
+                from_data.cert_ingresos = cert_ingresos_path
+
+            if acreditacion and acreditacion.filename:
+                acreditacion_path = os.path.join(upload_directory, f"{from_id}_{acreditacion.filename}")
+                with open(acreditacion_path, "wb") as buffer:
+                    shutil.copyfileobj(acreditacion.file, buffer)
+                from_data.acreditacion = acreditacion_path
+
+            db.commit()
+            db.refresh(from_data)
+
+            message = "Profile updated successfully!"
+            return RedirectResponse(url=app.url_path_for("edit_form", from_id=from_id),
+                                    status_code=status.HTTP_303_SEE_OTHER)
+
+        error = "Profile not found!"
+        return templates.TemplateResponse("edit_from.html", {"request": request, "error": error, "user_data": is_admin})
+
+    return RedirectResponse(url=app.url_path_for("get_login"))
+
+
+@app.get("/delete_form/{from_id}/")
+async def delete_form(request: Request, from_id: int,  db: Session = Depends(get_db)):
+    is_token = request.cookies.get('token')
+    if not is_token:
+        return RedirectResponse(url=app.url_path_for("get_login"))
+
+    is_admin = db.query(db_models.User).filter(db_models.User.user_token == is_token).first()
+    if is_admin and is_admin.user_role == "Admin":
+        from_data = db.query(db_models.Profile).filter(db_models.Profile.id == from_id).first()
+        if from_data:
+            db.delete(from_data)
+            db.commit()
+            return RedirectResponse(url=app.url_path_for("get_database"))
+        else:
+            error = "Profile not found!"
+            return templates.TemplateResponse("edit_from.html", {"request": request, "error": error,
+                                                                 "user_data": is_admin})
+
+    return RedirectResponse(url=app.url_path_for("get_login"))
 
 
 if __name__ == "__main__":
