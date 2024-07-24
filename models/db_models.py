@@ -31,6 +31,7 @@ class Profile(Base):
     f_nacimiento = Column(String, nullable=False)
     telefono = Column(String, nullable=False)
     foto = Column(String, nullable=False)
+    tipo = Column(String, nullable=False)
     cert_empadronamiento = Column(String, nullable=False)
     cert_ingresos = Column(String, nullable=False)
     acreditacion = Column(String, nullable=False)

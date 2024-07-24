@@ -48,6 +48,9 @@
         .hidden {
             display: none;
         }
+        .calculate_age {
+            display: none;
+        }
         .modal-dialog {
             max-width: 80%;
             margin: 1.75rem auto;
@@ -130,6 +133,11 @@
                         <input type="date" class="form-control" id="fecha_caducidad" name="fecha_caducidad" required>
                     </div>
 
+                    <div class="form-group calculate_age">
+                        <label for="tipo" class="form-label">Tipo:</label>
+                        <input type="text" class="form-control" id="tipo" name="tipo" readonly required>
+                    </div>
+
                     <div class="form-group">
                         <label class="form-label">Cert. Empadronamiento:</label>
                         <span id="cert_empadronamiento_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
@@ -157,7 +165,7 @@
 
                 <div class="col-md-4 photo-container mx-auto my-auto">
                     <img src="" alt="Foto" id="foto">
-                    <button type="button" class="btn btn-secondary btn-sm" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('profile_image')">Take Picture</button>
+<!--                    <button type="button" class="btn btn-secondary btn-sm" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#cameraModal" onclick="prepareCamera('profile_image')">Take Picture</button>-->
                     <label for="foto_upload" class="btn btn-secondary btn-sm">Upload Foto</label>
                     <input type="file" id="foto_upload" name="foto" style="display: none;" required>
                 </div>
@@ -184,6 +192,39 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const fNacimientoInput = document.getElementById('f_nacimiento');
+            const tipoInput = document.getElementById('tipo');
+            const calculateAgeContainer = document.querySelector('.calculate_age');
+
+            fNacimientoInput.addEventListener('change', function () {
+                const birthDate = new Date(fNacimientoInput.value);
+                const age = calculateAge(birthDate);
+
+                if (age >= 65) {
+                    tipoInput.value = "JUBILADO";
+                } else {
+                    tipoInput.value = "PENSIONISTA";
+                }
+
+                calculateAgeContainer.style.display = 'flex';
+            });
+
+            function calculateAge(birthDate) {
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+
+                return age;
+            }
+        });
+    </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {

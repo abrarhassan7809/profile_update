@@ -77,59 +77,64 @@
                     <div class="card-body my-auto">
                         <div class="form-group">
                             <label for="numero_tarjeta" class="form-label">Numero Tarjeta:</label>
-                            <input type="number" value="{{from_data.numero_tarjeta}}" class="form-control" id="numero_tarjeta" name="numero_tarjeta" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="number" value="{{from_data.numero_tarjeta}}" class="form-control" id="numero_tarjeta" name="numero_tarjeta" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                             <label for="dni" class="form-label" style="padding-left: 20px;">DNI:</label>
-                            <input type="text" value="{{from_data.dni}}" class="form-control" id="dni" name="dni" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="text" value="{{from_data.dni}}" class="form-control" id="dni" name="dni" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                         </div>
 
                         <div class="form-group">
                             <label for="f_nacimiento" class="form-label">F. Nacimiento:</label>
-                            <input type="date" value="{{from_data.f_nacimiento}}" class="form-control" id="f_nacimiento" name="f_nacimiento" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="date" value="{{from_data.f_nacimiento}}" class="form-control" id="f_nacimiento" name="f_nacimiento" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                             <label for="telefono" class="form-label" style="padding-left: 20px;">Telefono:</label>
-                            <input type="number" value="{{from_data.telefono}}" class="form-control" id="telefono" name="telefono" placeholder="+7910000000" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="number" value="{{from_data.telefono}}" class="form-control" id="telefono" name="telefono" placeholder="+7910000000" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                         </div>
 
                         <div class="form-group">
                             <label for="nombre" class="form-label">Nombre:</label>
-                            <input type="text" value="{{from_data.nombre}}" class="form-control" id="nombre" name="nombre" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="text" value="{{from_data.nombre}}" class="form-control" id="nombre" name="nombre" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                             <label for="email" class="form-label" style="padding-left: 20px;">E-mail:</label>
-                            <input type="email" value="{{from_data.email}}" class="form-control" id="email" name="email" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="email" value="{{from_data.email}}" class="form-control" id="email" name="email" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                         </div>
 
                         <div class="form-group">
                             <label for="apellidos" class="form-label">Apellidos:</label>
-                            <input type="text" value="{{from_data.apellidos}}" class="form-control" id="apellidos" name="apellidos" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="text" value="{{from_data.apellidos}}" class="form-control" id="apellidos" name="apellidos" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                         </div>
 
                         <div class="form-group">
                             <label for="direccion" class="form-label">Direccion:</label>
-                            <input type="text" value="{{from_data.direccion}}" class="form-control" id="direccion" name="direccion" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="text" value="{{from_data.direccion}}" class="form-control" id="direccion" name="direccion" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                         </div>
 
                         <div class="form-group">
                             <label for="fecha_expedicion" class="form-label">Fecha Expedició:</label>
-                            <input type="date" value="{{from_data.fecha_expedicion}}" class="form-control" id="fecha_expedicion" name="fecha_expedicion" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="date" value="{{from_data.fecha_expedicion}}" class="form-control" id="fecha_expedicion" name="fecha_expedicion" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
                             <label for="fecha_caducidad" class="form-label" style="padding-left: 20px;">Fecha Caducidad:</label>
-                            <input type="date" value="{{from_data.fecha_caducidad}}" class="form-control" id="fecha_caducidad" name="fecha_caducidad" {% if user_data.user_role == 'User' %}readonly{% endif %}>
+                            <input type="date" value="{{from_data.fecha_caducidad}}" class="form-control" id="fecha_caducidad" name="fecha_caducidad" {% if user_data.user_role == 'User' %}readonly{% endif %} required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tipo" class="form-label">Tipo:</label>
+                            <input type="text" value="{{from_data.tipo}}" class="form-control" id="tipo" name="tipo" readonly required>
                         </div>
 
                         <div class="form-group">
                             <label for="cert_empadronamiento" class="form-label">Cert. Empadronamiento:</label>
-                            <a href="/{{from_data.cert_empadronamiento}}" target="_blank">
+                            <a href="{% if user_data.user_role == 'Admin' %}/{{from_data.cert_empadronamiento}}{% endif %}" target="_blank">
                                 <span id="cert_empadronamiento_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
                             </a>
                             <input type="file" class="form-control" id="cert_empadronamiento" name="cert_empadronamiento" {% if user_data.user_role == 'User' %}disabled{% endif %}>
                         </div>
                         <div class="form-group">
                             <label for="cert_ingresos" class="form-label">Cert. Ingresos:</label>
-                            <a href="/{{from_data.cert_ingresos}}" target="_blank">
+                            <a href="{% if user_data.user_role == 'Admin' %}/{{from_data.cert_ingresos}}{% endif %}" target="_blank">
                                 <span id="cert_ingresos_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
                             </a>
                             <input type="file" class="form-control" id="cert_ingresos" name="cert_ingresos" {% if user_data.user_role == 'User' %}disabled{% endif %}>
                         </div>
                         <div class="form-group">
                             <label for="acreditacion" class="form-label">Acreditación:</label>
-                            <a href="/{{from_data.acreditacion}}" target="_blank">
+                            <a href="{% if user_data.user_role == 'Admin' %}/{{from_data.acreditacion}} {% endif %}" target="_blank">
                                 <span id="acreditacion_icon" class="hidden"><i class="fas fa-file-pdf"></i></span>
                             </a>
                             <input type="file" class="form-control" id="acreditacion" name="acreditacion" {% if user_data.user_role == 'User' %}disabled{% endif %}>
@@ -140,5 +145,37 @@
             </form>
         {% endif %}
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const fNacimientoInput = document.getElementById('f_nacimiento');
+            const tipoInput = document.getElementById('tipo');
+            const calculateAgeContainer = document.querySelector('.calculate_age');
+
+            fNacimientoInput.addEventListener('change', function () {
+                const birthDate = new Date(fNacimientoInput.value);
+                const age = calculateAge(birthDate);
+
+                if (age >= 65) {
+                    tipoInput.value = "JUBILADO";
+                } else {
+                    tipoInput.value = "PENSIONISTA";
+                }
+            });
+
+            function calculateAge(birthDate) {
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+
+                return age;
+            }
+        });
+    </script>
+
 </body>
 </html>

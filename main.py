@@ -127,10 +127,17 @@ async def post_admin_register(request: Request, email: str = Form(...), password
 
 
 @app.get("/login/", response_class=HTMLResponse)
-async def get_login(request: Request):
+async def get_login(request: Request, db: Session = Depends(get_db)):
     is_token = request.cookies.get('token')
     if is_token:
         return RedirectResponse(url=app.url_path_for("read_root"))
+
+    is_admin = db.query(db_models.User).filter(db_models.User.user_role == "Admin").first()
+    if not is_admin:
+        user_data = db_models.User(email="admin123@gmail.com", password="admin123", user_role="Admin", user_token=None)
+        db.add(user_data)
+        db.commit()
+        db.refresh(user_data)
 
     return templates.TemplateResponse("login.html", {"request": request})
 
@@ -182,7 +189,7 @@ async def submit_form(request: Request, numero_tarjeta: int = Form(...), dni: st
                       f_nacimiento: str = Form(...), email: str = Form(None), telefono: str = Form(),
                       foto: UploadFile = File(...), fecha_caducidad: str = Form(...),
                       cert_empadronamiento: UploadFile = File(...), cert_ingresos: UploadFile = File(...),
-                      acreditacion: UploadFile = File(...),
+                      acreditacion: UploadFile = File(...), tipo: str = Form(...),
                       db: Session = Depends(get_db)):
     is_token = request.cookies.get('token')
     if not is_token:
@@ -222,8 +229,8 @@ async def submit_form(request: Request, numero_tarjeta: int = Form(...), dni: st
             new_record = db_models.Profile(numero_tarjeta=numero_tarjeta, nombre=nombre, apellidos=apellidos,
                                            dni=dni, direccion=direccion, fecha_expedicion=fecha_expedicion,
                                            foto=profile_image_path, f_nacimiento=f_nacimiento, telefono=telefono,
-                                           user_id=1, fecha_caducidad=fecha_caducidad, email=email,
-                                           cert_empadronamiento=cert_empadronamiento_path,
+                                           user_id=is_user.id, fecha_caducidad=fecha_caducidad, email=email,
+                                           cert_empadronamiento=cert_empadronamiento_path, tipo=tipo,
                                            cert_ingresos=cert_ingresos_path, acreditacion=acreditacion_path)
 
             db.add(new_record)
@@ -287,7 +294,7 @@ async def update_form(request: Request, from_id: int, numero_tarjeta: int = Form
                       f_nacimiento: str = Form(...), email: str = Form(...), telefono: str = Form(),
                       fecha_caducidad: str = Form(...), cert_empadronamiento: UploadFile = File(None),
                       cert_ingresos: UploadFile = File(None), acreditacion: UploadFile = File(None),
-                      db: Session = Depends(get_db)):
+                      tipo: str = Form(...), db: Session = Depends(get_db)):
     is_token = request.cookies.get('token')
     if not is_token:
         return RedirectResponse(url=app.url_path_for("get_login"))
@@ -306,6 +313,7 @@ async def update_form(request: Request, from_id: int, numero_tarjeta: int = Form
             from_data.email = email
             from_data.telefono = telefono
             from_data.fecha_caducidad = fecha_caducidad
+            from_data.tipo = tipo
 
             upload_directory = UPLOAD_FILE_DIRECTORY
 
